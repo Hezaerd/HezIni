@@ -1,0 +1,10 @@
+name: Setup Premake
+run-name: Building project using Premake 🚀
+on: [push]
+jobs:
+  Setup-Premake:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: abel0b/setup-premake@v2.3
+        with:
+          version: "5.0.0-beta2"
