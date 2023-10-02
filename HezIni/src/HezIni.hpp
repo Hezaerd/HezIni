@@ -49,12 +49,12 @@ namespace Hez::Files
 	}
 
 	template<typename T>
-	class HezIniMap
+	class INIMap
 	{
 	public:
-		HezIniMap() = default;
+		INIMap() = default;
 
-		HezIniMap(HezIniMap const& pOther)
+		INIMap(INIMap const& pOther)
 		{
 			size_t dataSize = pOther.mData.size();
 
@@ -189,7 +189,7 @@ namespace Hez::Files
 		TData mData;
 	};
 
-	using HezIniStructure = HezIniMap<HezIniMap<std::string>>;
+	using HezIniStructure = INIMap<INIMap<std::string>>;
 
 	namespace IniParser
 	{
@@ -257,4 +257,8 @@ namespace Hez::Files
 			return PDataType::PDATA_UNKNOW;
 		}
 	}
+
+	class INIReader
+	{
+	};
 }
