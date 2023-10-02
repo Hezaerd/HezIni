@@ -62,6 +62,36 @@ namespace Hez::Files
 			mDataIndexMap = TDataIndexMap(pOther.mDataIndexMap);
 		}
 
+		T& operator[](const std::string& pKey)
+		{
+			HezIniStringUtil::trim(pKey);
+
+#ifndef HEZ_INI_CASE_SENSITIVE
+			HezIniStringUtil::toLower(pKey);
+#endif
+
+			auto it = mDataIndexMap.find(pKey);
+			if (it == mDataIndexMap.end())
+				return mData[setEmpty(pKey)].second;
+			else
+				return mData[it->second].second;
+		}
+
+		T get(const std::string& pKey) const
+		{
+			HezIniStringUtil::trim(pKey);
+
+#ifndef HEZ_INI_CASE_SENSITIVE
+			HezIniStringUtil::toLower(pKey);
+#endif
+
+			auto it = mDataIndexMap.find(pKey);
+			if (it == mDataIndexMap.end())
+				return T();
+			else
+				return mData[it->second].second;
+		}
+
 	private:
 		inline size_t setEmpty(const std::string& pKey)
 		{
