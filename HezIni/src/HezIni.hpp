@@ -5,7 +5,7 @@
 
 namespace Hez::Files
 {
-	namespace HezIniStringUtil
+	namespace StringUtil
 	{
 #ifdef HEZ_PLATFORM_WINDOWS
 		const char* const endl = "\r\n";
@@ -69,7 +69,7 @@ namespace Hez::Files
 
 		T& operator[](const std::string& pKey)
 		{
-			HezIniStringUtil::trim(pKey);
+			StringUtil::trim(pKey);
 
 			HEZ_INI_IFCS_TL(pKey);
 
@@ -82,7 +82,7 @@ namespace Hez::Files
 
 		T get(const std::string& pKey) const
 		{
-			HezIniStringUtil::trim(pKey);
+			StringUtil::trim(pKey);
 
 			HEZ_INI_IFCS_TL(pKey);
 
@@ -95,7 +95,7 @@ namespace Hez::Files
 
 		bool has(const std::string& pKey) const
 		{
-			HezIniStringUtil::trim(pKey);
+			StringUtil::trim(pKey);
 
 			HEZ_INI_IFCS_TL(pKey);
 
@@ -104,7 +104,7 @@ namespace Hez::Files
 
 		void set(const std::string& pKey, const T& pValue)
 		{
-			HezIniStringUtil::trim(pKey);
+			StringUtil::trim(pKey);
 
 			HEZ_INI_IFCS_TL(pKey);
 
@@ -127,7 +127,7 @@ namespace Hez::Files
 
 		bool remove(const std::string& pKey)
 		{
-			HezIniStringUtil::trim(pKey);
+			StringUtil::trim(pKey);
 
 			HEZ_INI_IFCS_TL(pKey);
 
@@ -188,4 +188,73 @@ namespace Hez::Files
 		TDataIndexMap mDataIndexMap;
 		TData mData;
 	};
+
+	using HezIniStructure = HezIniMap<HezIniMap<std::string>>;
+
+	namespace IniParser
+	{
+		using TParseValues = std::pair<std::string, std::string>;
+
+		enum class PDataType
+		{
+			PDATA_NONE,
+			PDATA_COMMENT,
+			PDATA_SECTION,
+			PDATA_KEYVALUE,
+			PDATA_UNKNOW
+		};
+
+		inline PDataType parseLine(std::string pLine, TParseValues& pParseData)
+		{
+			pParseData.first.clear();
+			pParseData.second.clear();
+
+			StringUtil::trim(pLine);
+
+			if (pLine.empty())
+				return PDataType::PDATA_NONE;
+
+			char firstChar = pLine[0];
+
+			if (firstChar == ';')
+				return PDataType::PDATA_COMMENT;
+
+			if (firstChar == '[')
+			{
+				auto commentAt = pLine.find_first_of(';');
+				if (commentAt != std::string::npos)
+					pLine.erase(commentAt);
+
+				auto closingBracketAt = pLine.find_last_of(']');
+				if (closingBracketAt != std::string::npos)
+				{
+					auto section = pLine.substr(1, closingBracketAt - 1);
+					StringUtil::trim(section);
+					pParseData.first = section;
+					return PDataType::PDATA_SECTION;
+				}
+			}
+
+			std::string lineNorm = pLine;
+			StringUtil::replace(lineNorm, "\\=", "  ");
+
+			auto equalAt = lineNorm.find_first_of('=');
+			if (equalAt != std::string::npos)
+			{
+				auto key = lineNorm.substr(0, equalAt);
+				StringUtil::trim(key);
+				StringUtil::replace(key, "\\=", "=");
+
+				auto value = lineNorm.substr(equalAt + 1);
+				StringUtil::trim(value);
+
+				pParseData.first = key;
+				pParseData.second = value;
+
+				return PDataType::PDATA_KEYVALUE;
+			}
+
+			return PDataType::PDATA_UNKNOW;
+		}
+	}
 }
