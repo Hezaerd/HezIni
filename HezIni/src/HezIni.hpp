@@ -115,6 +115,16 @@ namespace Hez::Files
 				mData[it->second].second = pValue;
 		}
 
+		void set(TMultiArgs pArgs)
+		{
+			for (auto const& it : pArgs)
+			{
+				auto const& key = it.first;
+				auto const& value = it.second;
+				set(key, value);
+			}
+		}
+
 	private:
 		inline size_t setEmpty(const std::string& pKey)
 		{
