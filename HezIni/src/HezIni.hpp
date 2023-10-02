@@ -21,6 +21,11 @@ namespace Hez::Files
 		}
 #endif
 
+#define HEZ_INI_IFCS_TL(pStr)
+#ifdef HEZ_INI_CASE_SENSITIVE \
+		HezIniStringUtil::toLower(pStr);
+#endif
+
 		const char* const sWhitespace = " \t\n\r\f\v";
 
 		inline void trim(std::string& pStr)
@@ -66,9 +71,7 @@ namespace Hez::Files
 		{
 			HezIniStringUtil::trim(pKey);
 
-#ifndef HEZ_INI_CASE_SENSITIVE
-			HezIniStringUtil::toLower(pKey);
-#endif
+			HEZ_INI_IFCS_TL(pKey);
 
 			auto it = mDataIndexMap.find(pKey);
 			if (it == mDataIndexMap.end())
@@ -81,15 +84,35 @@ namespace Hez::Files
 		{
 			HezIniStringUtil::trim(pKey);
 
-#ifndef HEZ_INI_CASE_SENSITIVE
-			HezIniStringUtil::toLower(pKey);
-#endif
+			HEZ_INI_IFCS_TL(pKey);
 
 			auto it = mDataIndexMap.find(pKey);
 			if (it == mDataIndexMap.end())
 				return T();
 			else
 				return mData[it->second].second;
+		}
+
+		bool has(const std::string& pKey) const
+		{
+			HezIniStringUtil::trim(pKey);
+
+			HEZ_INI_IFCS_TL(pKey);
+
+			return mDataIndexMap.find(pKey) != mDataIndexMap.end();
+		}
+
+		void set(const std::string& pKey, const T& pValue)
+		{
+			HezIniStringUtil::trim(pKey);
+
+			HEZ_INI_IFCS_TL(pKey);
+
+			auto it = mDataIndexMap.find(pKey);
+			if (it == mDataIndexMap.end())
+				mData[setEmpty(pKey)].second = pValue;
+			else
+				mData[it->second].second = pValue;
 		}
 
 	private:
