@@ -2,6 +2,9 @@
 
 #include <string>
 #include <map>
+#include <vector>
+#include <memory>
+#include <fstream>
 
 namespace Hez::Files
 {
@@ -260,5 +263,79 @@ namespace Hez::Files
 
 	class INIReader
 	{
+	public:
+		using TLineData = std::vector<std::string>;
+		using TLineDataPtr = std::shared_ptr<TLineData>;
+
+	private:
+		TLineData readFile()
+		{
+			mFileReadStream.seekg(0, std::ios::end);
+			const size_t fileSize = static_cast<size_t>(mFileReadStream.tellg());
+			mFileReadStream.seekg(0, std::ios::beg);
+			
+			if (fileSize >= 3)
+			{
+				const char header[3] =
+				{
+					static_cast<char>(mFileReadStream.get()),
+					static_cast<char>(mFileReadStream.get()),
+					static_cast<char>(mFileReadStream.get())
+				};
+
+				isBOM = (
+						header[0] == static_cast<char>(0xEF)&&
+						header[1] == static_cast<char>(0xBB)&&
+						header[2] == static_cast<char>(0xBF)
+						);
+						
+			}
+			else
+			{
+				isBOM = false;
+			}
+
+			std::string fileContent;
+			fileContent.reserve(fileSize);
+			mFileReadStream.seekg(isBOM ? 3 : 0, std::ios::beg);
+			mFileReadStream.read(&fileContent[0], fileSize);
+			mFileReadStream.close();
+			
+			TLineData output;
+
+			if (fileSize == 0)
+				return output;
+
+			std::string lineBuffer;
+			lineBuffer.resize(256); // TODO: determine a good value for this 256 is only temp
+			
+			for (size_t i = 0; i < fileSize; ++i)
+			{
+				char& c = fileContent[i];
+
+				if (c == '\n')
+				{
+					output.emplace_back(lineBuffer);
+					lineBuffer.clear();
+					continue;
+				}
+
+				if (c == '\r' && c == '\0')
+				{
+					lineBuffer += c;
+				}
+			}
+
+			output.emplace_back(lineBuffer);
+			return output;
+		}
+
+	public:
+		bool isBOM = false;
+
+	private:
+		std::ifstream mFileReadStream;
+		TLineDataPtr mLineData;
+		
 	};
 }
