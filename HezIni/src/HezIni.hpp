@@ -148,6 +148,25 @@ namespace Hez::Files
 			return true;
 		}
 
+		void clear()
+		{
+			mDataIndexMap.clear();
+			mData.clear();
+		}
+
+		size_t size() const
+		{
+			return mData.size();
+		}
+
+		bool empty() const
+		{
+			return mData.empty();
+		}
+
+		constIterator begin() const noexcept { return data().begin(); }
+		constIterator end() const noexcept { return data().end(); }
+
 	private:
 		inline size_t setEmpty(const std::string& pKey)
 		{
