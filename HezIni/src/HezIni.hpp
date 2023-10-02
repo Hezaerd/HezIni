@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <map>
 
 namespace Hez::Files
 {
@@ -41,4 +42,45 @@ namespace Hez::Files
 			}
 		}
 	}
+
+	template<typename T>
+	class HezIniMap
+	{
+	public:
+		HezIniMap() = default;
+
+		HezIniMap(HezIniMap const& pOther)
+		{
+			size_t dataSize = pOther.mData.size();
+
+			for (size_t i = 0; i < dataSize; ++i)
+			{
+				auto const& key = pOther.mData[i].first;
+				auto const& value = pOther.mData[i].second;
+				mData.emplace_back(key, value);
+			}
+			mDataIndexMap = TDataIndexMap(pOther.mDataIndexMap);
+		}
+
+	private:
+		inline size_t setEmpty(const std::string& pKey)
+		{
+			std::size_t index = mData.size();
+			mDataIndexMap[pKey] = index;
+			mData.emplace_back(pKey, T());
+			return index;
+		}
+
+	public:
+		using constIterator = typename TData::const_iterator;
+
+	private:
+		using TDataIndexMap = std::unordered_map<std::string, size_t>;
+		using TDataItem = std::pair<std::string, T>;
+		using TData = std::vector<TDataItem>;
+		using TMultiArgs = std::initializer_list<std::pair<std::string, T>>;
+
+		TDataIndexMap mDataIndexMap;
+		TData mData;
+	};
 }
