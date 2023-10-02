@@ -115,7 +115,7 @@ namespace Hez::Files
 				mData[it->second].second = pValue;
 		}
 
-		void set(TMultiArgs pArgs)
+		void set(const TMultiArgs& pArgs)
 		{
 			for (auto const& it : pArgs)
 			{
@@ -123,6 +123,29 @@ namespace Hez::Files
 				auto const& value = it.second;
 				set(key, value);
 			}
+		}
+
+		bool remove(const std::string& pKey)
+		{
+			HezIniStringUtil::trim(pKey);
+
+			HEZ_INI_IFCS_TL(pKey);
+
+			auto it = mDataIndexMap.find(pKey);
+			if (it == mDataIndexMap.end())
+				return false;
+
+			size_t index = it->second;
+			mDataIndexMap.erase(it);
+			mData.erase(mData.begin() + index);
+
+			for (auto& it : mDataIndexMap)
+			{
+				if (it.second > index)
+					--it.second;
+			}
+
+			return true;
 		}
 
 	private:
