@@ -24,6 +24,11 @@ project "HezIni"
     filter "system:windows"
         systemversion "latest"
 
+        defines
+        {
+            "HEZ_PLATFORM_WINDOWS"
+        }
+
     filter "configurations:Debug"
         defines "HEZ_DEBUG"
         runtime "Debug"
